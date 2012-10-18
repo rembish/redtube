@@ -6,7 +6,7 @@ from sys import version_info
 from furl import furl
 from math import pow
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 class RedException(Exception):
     pass
