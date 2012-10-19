@@ -1,14 +1,15 @@
 from urllib2 import urlopen, Request, URLError
+from sys import version_info, argv
+from optparse import OptionParser
 from datetime import datetime
 from urllib import urlencode
-from sys import version_info
 from base64 import b64decode
 from weakref import ref
 from json import loads
 from copy import copy
 from math import pow
 
-__version__ = '0.3.5'
+__version__ = '0.4'
 
 class RedException(Exception):
     pass
@@ -22,7 +23,8 @@ class RedVideo(object):
         self.thumbnail_url = kwargs['thumb']
 
         self.published = datetime.strptime(kwargs['publish_date'], '%Y-%m-%d %H:%M:%S') if kwargs['publish_date'] else None
-        self.duration = int(sum(map(lambda x: x[1] * pow(60, x[0]), enumerate(map(int, kwargs['duration'].split(':')[::-1])))))
+        self.timing = kwargs['duration']
+        self.duration = int(sum(map(lambda x: x[1] * pow(60, x[0]), enumerate(map(int, self.timing.split(':')[::-1])))))
 
         self.tags = [entry if isinstance(entry, basestring) else entry['tag_name'] for entry in kwargs.get('tags', [])]
         self.stars = [entry if isinstance(entry, basestring) else entry['star_name'] for entry in kwargs.get('stars', [])]
@@ -93,6 +95,7 @@ class RedCollection(list):
         return self.__class__(self.client, data)
 
 class RedClient(object):
+    ''' Python RedTube API Client '''
     server = 'http://api.redtube.com/'
     thumbnail_sizes = ['all', 'small', 'medium', 'medium1', 'medium2', 'big']
 
@@ -128,9 +131,9 @@ class RedClient(object):
         if category:
             data['category'] = category
         if tags:
-            data['tags'] = tags
+            data['tags[]'] = tags
         if stars:
-            data['stars'] = stars
+            data['stars[]'] = stars
         if thumbnail_size:
             data['thumbsize'] = thumbnail_size
 
@@ -175,3 +178,16 @@ class RedClient(object):
                 entry['star']['star_name'] for entry in self._request('redtube.Stars.getStarList')['stars']
             ]
         return self._stars
+
+def main(args=argv[1:]):
+    parser = OptionParser(version=__version__, description=RedClient.__doc__)
+    parser.add_option('-q', '--query', dest="query", help='Query string', metavar='QRY')
+    parser.add_option('-t', '--tag', dest='tags', action="append", default=[], help='Tags to search', metavar='TAG')
+
+    options = parser.parse_args(args)[0]
+
+    for video in RedClient().search(query=options.query, tags=options.tags):
+        print '[%s] %s: %s' % (video.timing, video.title, video.url)
+
+if __name__ == '__main__':
+    main(argv[1:])

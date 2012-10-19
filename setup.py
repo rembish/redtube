@@ -10,6 +10,9 @@ setup(
     author="Don Ramon",
     url="https://github.com/don-ramon/redtube",
     py_modules=["redtube"],
+    entry_points={'console_scripts': [
+        'redtube-search = redtube:main'
+    ]},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 2.6",
