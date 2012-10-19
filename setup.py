@@ -20,6 +20,5 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
         "Topic :: Multimedia :: Video"
     ],
-    keywords='redtube api client',
-    install_requires=['python-dateutil', 'simplejson', 'furl']
+    keywords='redtube api client'
 )
