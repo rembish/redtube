@@ -7,6 +7,7 @@ setup(
     version=__version__,
     license="BSD",
     description="Python module to access RedTube API",
+    long_description="".join(open('README.rst').readlines()),
     author="Don Ramon",
     url="https://github.com/don-ramon/redtube",
     py_modules=["redtube"],
