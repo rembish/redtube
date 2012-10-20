@@ -9,7 +9,7 @@ from json import loads
 from copy import copy
 from math import pow
 
-__version__ = '0.4.4'
+__version__ = '0.4.7'
 
 class RedException(Exception):
     pass

@@ -1,0 +1,4 @@
+include redtube.py
+include setup.py
+include README.rst
+include MANIFEST.in
