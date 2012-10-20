@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 from distutils.core import setup
+from os.path import abspath, dirname, join
 from redtube import __version__
+
+here = abspath(dirname(__file__))
 
 setup(
     name='redtube',
     version=__version__,
     license="BSD",
     description="Python module to access RedTube API",
-    long_description="".join(open('README.rst').readlines()),
+    long_description="".join(open(join(here, 'README.rst')).readlines()),
     author="Don Ramon",
     url="https://github.com/don-ramon/redtube",
     py_modules=["redtube"],
