@@ -9,10 +9,12 @@ from json import loads
 from copy import copy
 from math import pow
 
-__version__ = '0.4.7'
+__version__ = '0.5.0'
+
 
 class RedException(Exception):
     pass
+
 
 class RedVideo(object):
     def __init__(self, client, kwargs):
@@ -22,12 +24,23 @@ class RedVideo(object):
         self.url = kwargs['url']
         self.thumbnail_url = kwargs['thumb']
 
-        self.published = datetime.strptime(kwargs['publish_date'], '%Y-%m-%d %H:%M:%S') if kwargs['publish_date'] else None
+        self.published = \
+            datetime.strptime(kwargs['publish_date'], '%Y-%m-%d %H:%M:%S') \
+            if kwargs['publish_date'] else None
         self.timing = kwargs['duration']
-        self.duration = int(sum(map(lambda x: x[1] * pow(60, x[0]), enumerate(map(int, self.timing.split(':')[::-1])))))
+        self.duration = int(sum(map(
+            lambda x: x[1] * pow(60, x[0]),
+            enumerate(map(int, self.timing.split(':')[::-1]))
+        )))
 
-        self.tags = [entry if isinstance(entry, basestring) else entry['tag_name'] for entry in kwargs.get('tags', [])]
-        self.stars = [entry if isinstance(entry, basestring) else entry['star_name'] for entry in kwargs.get('stars', [])]
+        self.tags = [
+            entry if isinstance(entry, basestring) else entry['tag_name']
+            for entry in kwargs.get('tags', [])
+        ]
+        self.stars = [
+            entry if isinstance(entry, basestring) else entry['star_name']
+            for entry in kwargs.get('stars', [])
+        ]
 
         self.thumbnails = {}
         for entry in kwargs.get('thumbs', []):
@@ -54,18 +67,23 @@ class RedVideo(object):
     @property
     def active(self):
         if self._active is None:
-            self._active = bool(self.client._request('redtube.Videos.isVideoActive', video_id=self.id)['active']['is_active'])
+            self._active = bool(self.client._request(
+                'redtube.Videos.isVideoActive', video_id=self.id
+            )['active']['is_active'])
         return self._active
 
     @property
     def embed(self):
         if not self._code:
-            self._code = b64decode(self.client._request('redtube.Videos.getVideoEmbedCode', video_id=self.id)['embed']['code'])
+            self._code = b64decode(self.client._request(
+                'redtube.Videos.getVideoEmbedCode', video_id=self.id
+            )['embed']['code'])
         return self._code
 
     @property
     def player_url(self):
         return 'http://embed.redtube.com/player/?id=%s' % self.id
+
 
 class RedCollection(list):
     def __init__(self, client, data):
@@ -94,6 +112,7 @@ class RedCollection(list):
         data['page'] = data.get('page', 1) + 1
         return self.__class__(self.client, data)
 
+
 class RedClient(object):
     ''' Python RedTube API Client '''
     server = 'http://api.redtube.com/'
@@ -119,7 +138,10 @@ class RedClient(object):
         except URLError as e:
             raise RedException(str(e))
 
-    def search(self, query=None, category=None, tags=[], stars=[], thumbnail_size=None, page=1):
+    def search(
+            self, query=None, category=None, tags=[],
+            stars=[], thumbnail_size=None, page=1):
+
         if thumbnail_size not in self.thumbnail_sizes:
             thumbnail_size = None
         if page < 1:
@@ -148,7 +170,9 @@ class RedClient(object):
             data['thumbsize'] = thumbnail_size
 
         try:
-            return RedVideo(self, self._request('redtube.Videos.getVideoById', **data)['video'])
+            return RedVideo(self, self._request(
+                'redtube.Videos.getVideoById', **data
+            )['video'])
         except KeyError:
             return None
 
@@ -159,7 +183,10 @@ class RedClient(object):
     def categories(self):
         if not self._categories:
             self._categories = [
-                entry['category'] for entry in self._request('redtube.Categories.getCategoriesList')['categories']
+                entry['category'] for entry in
+                self._request(
+                    'redtube.Categories.getCategoriesList'
+                )['categories']
             ]
         return self._categories
 
@@ -167,7 +194,8 @@ class RedClient(object):
     def tags(self):
         if not self._tags:
             self._tags = [
-                entry['tag']['tag_name'] for entry in self._request('redtube.Tags.getTagList')['tags']
+                entry['tag']['tag_name'] for entry in
+                self._request('redtube.Tags.getTagList')['tags']
             ]
         return self._tags
 
@@ -175,14 +203,21 @@ class RedClient(object):
     def stars(self):
         if not self._stars:
             self._stars = [
-                entry['star']['star_name'] for entry in self._request('redtube.Stars.getStarList')['stars']
+                entry['star']['star_name'] for entry in
+                self._request('redtube.Stars.getStarList')['stars']
             ]
         return self._stars
 
+
 def main(args=argv[1:]):
     parser = OptionParser(version=__version__, description=RedClient.__doc__)
-    parser.add_option('-q', '--query', dest="query", help='Query string', metavar='QRY')
-    parser.add_option('-t', '--tag', dest='tags', action="append", default=[], help='Tags to search', metavar='TAG')
+    parser.add_option(
+        '-q', '--query', dest="query", help='Query string', metavar='QRY'
+    )
+    parser.add_option(
+        '-t', '--tag', dest='tags', action="append", default=[],
+        help='Tags to search', metavar='TAG'
+    )
 
     options = parser.parse_args(args)[0]
 
